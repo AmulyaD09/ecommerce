@@ -13,12 +13,20 @@ from rest_framework import status
 
 @api_view(['GET'])
 def getProducts(request):
-    query = request.query_params.get('keyword')
-    if query == None:
-        query = ''
+    query = request.query_params.get('keyword', '')
+    category = request.query_params.get('category', '')
 
-    products = Product.objects.filter(
-        name__icontains=query).order_by('-createdAt')
+    products = Product.objects.all()
+
+    if query:
+        products = products.filter(name__icontains=query)
+
+    if category:
+        products = products.filter(category=category)
+    products = products.order_by('-createdAt')
+
+    page = request.query_params.get('page')
+    paginator = Paginator(products, 8)
 
     page = request.query_params.get('page')
     paginator = Paginator(products, 8)
